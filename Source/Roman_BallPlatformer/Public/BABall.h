@@ -4,6 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
+#include "EnhancedInputSubsystems.h" // Include for Enhanced Input
+#include "EnhancedInputComponent.h" // Include for Enhanced Input Component
+#include "InputMappingContext.h"    // Include for Input Mapping Context
+#include "InputAction.h"  
 #include "BABall.generated.h"
 
 UCLASS()
@@ -25,6 +29,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Move")
 	float JumpForce;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TSoftObjectPtr<UInputMappingContext> InputMapping;
+
+	//UPROPERTY(EditAnywhere, Category = "Input")
+	//TSoftObjectPtr<UInputAction> JumpAction;
 
 protected:
 	// Called when the game starts or when spawned

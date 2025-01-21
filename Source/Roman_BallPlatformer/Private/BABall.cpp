@@ -6,7 +6,7 @@
 // Sets default values
 ABABall::ABABall()
 {
- 	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	BallComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BallComponent"));
@@ -27,7 +27,18 @@ ABABall::ABABall()
 void ABABall::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	if (ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(this))
+	{
+		UE_LOG(LogTemp, Error, TEXT("t"));
+		if (UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+		{
+			if (!InputMapping.IsNull())
+			{
+				InputSystem->AddMappingContext(InputMapping.LoadSynchronous(), 0);
+			}
+		}
+	}
 }
 
 // Called every frame
@@ -42,6 +53,9 @@ void ABABall::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	//UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
+	// You can bind to any of the trigger events here by changing the "ETriggerEvent" enum value
+	//Input->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ABABall::Move);
 }
 
 void ABABall::Jump()
