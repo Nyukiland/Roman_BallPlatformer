@@ -1,0 +1,60 @@
+# Ignore build files
+DerivedDataCache/
+Intermediate/
+Saved/
+.vscode/
+.vs/
+
+# Ignore Unreal-specific files
+*.sln
+*.suo
+*.VC.db
+*.VC.opendb
+*.VC.db-shm
+*.VC.db-wal
+*.log
+*.pdb
+*.idb
+*.opendb
+*.tlog
+
+# Ignore system and IDE files
+.DS_Store
+Thumbs.db
+*.iml
+*.ipr
+*.iws
+
+# Ignore environment files
+.env
+
+# Ignore temporary files
+*.tmp
+*.bak
+*.swp
+*.swo
+*.tmp
+*.ldb
+
+# Keep the Config folder but ignore local configuration
+Config/*.ini
+!Config/Default*.ini
+Config/Local/*
+
+# Keep the Content folder but ignore temporary and auto-generated files
+!Content/
+Content/Developers/
+Content/Collections/
+*.uasset.tmp
+
+# Keep the Source folder but ignore build artifacts
+!Source/
+Source/*.cpp~*
+Source/*.h~*
+
+# Ignore compiled plugins
+!Plugins/*/Binaries/
+Plugins/*/Intermediate/
+
+#Jet Brain Rider
+*.idea
