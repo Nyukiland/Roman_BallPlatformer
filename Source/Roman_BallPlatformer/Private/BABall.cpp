@@ -2,6 +2,10 @@
 
 
 #include "BABall.h"
+#include "Kismet/GameplayStatics.h"
+#include "EnhancedInputComponent.h"
+#include "EnhancedInputSubsystems.h"
+#include "InputActionValue.h"
 
 // Sets default values
 ABABall::ABABall()
@@ -28,14 +32,16 @@ void ABABall::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(this))
+	APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+	if (PlayerController != nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("t"));
-		if (UEnhancedInputLocalPlayerSubsystem* InputSystem = LocalPlayer->GetSubsystem<UEnhancedInputLocalPlayerSubsystem>())
+		if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerController->GetLocalPlayer()))
 		{
-			if (!InputMapping.IsNull())
+			// Add the input mapping context
+			if (PlayerMappingContext)
 			{
-				InputSystem->AddMappingContext(InputMapping.LoadSynchronous(), 0);
+				Subsystem->AddMappingContext(PlayerMappingContext, 0);
 			}
 		}
 	}
@@ -53,23 +59,35 @@ void ABABall::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	//UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
-	// You can bind to any of the trigger events here by changing the "ETriggerEvent" enum value
-	//Input->BindAction(JumpAction, ETriggerEvent::Triggered, this, &ABABall::Move);
+	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent))
+	{
+		if (IAMove)
+		{
+			EnhancedInputComponent->BindAction(IAMove, ETriggerEvent::Triggered, this, &ABABall::Move);
+		}
+		if (IAJump)
+		{
+			EnhancedInputComponent->BindAction(IAJump, ETriggerEvent::Started, this, &ABABall::Jump);
+		}
+	}
 }
 
-void ABABall::Jump()
+void ABABall::Jump(const FInputActionValue& Value)
 {
 	if (!CheckValidity()) return;
+
+	UE_LOG(LogTemp, Error, TEXT("jump"));
 
 	BallComponent->AddForce(FVector(0, 0, JumpForce));
 }
 
-void ABABall::Move()
+void ABABall::Move(const FInputActionValue& Value)
 {
 	if (!CheckValidity()) return;
+	UE_LOG(LogTemp, Error, TEXT("move"));
 
-	BallComponent->AddForce(FVector(0, 0, 0));
+	FVector2D MoveDir = Value.Get<FVector2D>();
+	BallComponent->AddForce(FVector(MoveDir.X, MoveDir.Y, 0) * Speed);
 }
 
 bool ABABall::CheckValidity()

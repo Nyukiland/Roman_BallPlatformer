@@ -24,17 +24,20 @@ private:
 	UStaticMeshComponent* BallComponent;
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Move")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
 	float Speed;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Move")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
 	float JumpForce;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
-	TSoftObjectPtr<UInputMappingContext> InputMapping;
+	UInputMappingContext* PlayerMappingContext;
 
-	//UPROPERTY(EditAnywhere, Category = "Input")
-	//TSoftObjectPtr<UInputAction> JumpAction;
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> IAMove;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> IAJump;
 
 protected:
 	// Called when the game starts or when spawned
@@ -48,7 +51,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 private:
-	void Jump();
-	void Move();
+	void Jump(const FInputActionValue& Value);
+	void Move(const FInputActionValue& Value);
 	bool CheckValidity();
 };
