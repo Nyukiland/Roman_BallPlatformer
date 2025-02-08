@@ -6,6 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
+#include "Camera/CameraComponent.h"
 
 // Sets default values
 ABABall::ABABall()
@@ -22,9 +23,18 @@ ABABall::ABABall()
 		BallComponent->SetStaticMesh(SphereAsset.Object);
 	}
 
-	//remove all physics system
-	BallComponent->SetSimulatePhysics(false);
-	BallComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	BallComponent->SetSimulatePhysics(true);
+	BallComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	BallComponent->BodyInstance.bLockRotation = true;
+
+	//create pivot and camera
+	Pivot = CreateDefaultSubobject<USceneComponent>(TEXT("Pivot"));
+	Pivot->SetupAttachment(BallComponent);
+
+	UCameraComponent* Cam = CreateDefaultSubobject<UCameraComponent>(TEXT("Cam"));
+	Cam->SetupAttachment(Pivot);
+	Cam->SetRelativeLocation(FVector(-300.0f, 0.0f, 100.0f));
+	Cam->SetRelativeRotation(FRotator(-20.0f, 0.0f, 0.0f));
 }
 
 // Called when the game starts or when spawned
@@ -51,7 +61,7 @@ void ABABall::BeginPlay()
 void ABABall::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	GetGround();
 }
 
 // Called to bind functionality to input
@@ -69,6 +79,10 @@ void ABABall::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		{
 			EnhancedInputComponent->BindAction(IAJump, ETriggerEvent::Started, this, &ABABall::Jump);
 		}
+		if (IALook)
+		{
+			EnhancedInputComponent->BindAction(IALook, ETriggerEvent::Triggered, this, &ABABall::LookAround);
+		}
 	}
 }
 
@@ -76,18 +90,67 @@ void ABABall::Jump(const FInputActionValue& Value)
 {
 	if (!CheckValidity()) return;
 
-	UE_LOG(LogTemp, Error, TEXT("jump"));
-
-	BallComponent->AddForce(FVector(0, 0, JumpForce));
+	if (Grounded) BallComponent->AddImpulse(FVector(0, 0, JumpForce), NAME_None, true);
 }
 
 void ABABall::Move(const FInputActionValue& Value)
 {
 	if (!CheckValidity()) return;
-	UE_LOG(LogTemp, Error, TEXT("move"));
 
 	FVector2D MoveDir = Value.Get<FVector2D>();
-	BallComponent->AddForce(FVector(MoveDir.X, MoveDir.Y, 0) * Speed);
+
+	FVector Movement = Pivot->GetForwardVector() * MoveDir.X;
+	Movement += Pivot->GetRightVector() * MoveDir.Y;
+	Movement *= Speed;
+
+	BallComponent->AddForce(Movement, NAME_None, false);
+}
+
+void ABABall::LookAround(const FInputActionValue& Value)
+{
+	if (!CheckValidity()) return;
+
+	float Rot = Value.Get<float>();
+
+	FRotator NewRotation = Pivot->GetRelativeRotation();
+	NewRotation.Yaw += Rot * CamRotSpeed;
+
+	Pivot->SetRelativeRotation(NewRotation);
+}
+
+void ABABall::GetGround()
+{
+	if (!CheckValidity()) return;
+
+	FVector Start = BallComponent->GetComponentLocation();
+	FVector End = Start + FVector(0, 0, -GroundCheckSize); 
+	FCollisionQueryParams TraceParams;
+	TraceParams.AddIgnoredActor(this);
+
+	FHitResult Hit;
+
+	if (GetWorld()->LineTraceSingleByChannel(Hit, Start, End, ECC_Visibility, TraceParams))
+	{
+		Grounded = true;
+
+		AActor* HitActor = Hit.GetActor();
+		if (HitActor && HitActor->GetRootComponent()->Mobility == EComponentMobility::Movable)
+		{
+			IsAttached = true;
+			//AttachToComponent(HitActor->GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
+		}
+		else
+		{
+			//DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+			IsAttached = false;
+		}
+	}
+	else
+	{
+		Grounded = false;
+		//if (!IsAttached) DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		IsAttached = false;
+	}
 }
 
 bool ABABall::CheckValidity()
@@ -95,6 +158,12 @@ bool ABABall::CheckValidity()
 	if (!BallComponent || !BallComponent->IsSimulatingPhysics())
 	{
 		UE_LOG(LogTemp, Error, TEXT("[ABABall::CheckValidity] BallComponent not valid"));
+		return false;
+	}
+
+	if (!Pivot)
+	{
+		UE_LOG(LogTemp, Error, TEXT("[ABABall::CheckValidity] Pivot not valid"));
 		return false;
 	}
 

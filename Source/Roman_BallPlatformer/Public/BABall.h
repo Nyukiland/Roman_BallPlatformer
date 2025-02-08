@@ -20,15 +20,28 @@ public:
 	ABABall();
 
 private:
-	UPROPERTY(VisibleAnywhere, Category = "Move")
-	UStaticMeshComponent* BallComponent;
+
+	bool Grounded;
+	bool IsAttached;
 
 protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
+	UStaticMeshComponent* BallComponent;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
+	USceneComponent* Pivot;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
 	float Speed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
 	float JumpForce;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
+	float CamRotSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
+	float GroundCheckSize;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputMappingContext* PlayerMappingContext;
@@ -38,6 +51,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction> IAJump;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> IALook;
 
 protected:
 	// Called when the game starts or when spawned
@@ -53,5 +69,7 @@ public:
 private:
 	void Jump(const FInputActionValue& Value);
 	void Move(const FInputActionValue& Value);
+	void LookAround(const FInputActionValue& Value);
+	void GetGround();
 	bool CheckValidity();
 };
