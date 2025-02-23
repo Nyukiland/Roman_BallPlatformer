@@ -19,16 +19,19 @@ public:
 	// Sets default values for this pawn's properties
 	ABABall();
 
+public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Move")
+	UStaticMeshComponent* BallComponent;
+
 private:
 
 	bool Grounded;
+	bool CanMove = true;
 	bool IsAttached;
+	int JumpCount = 0;
 
 protected:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
-	UStaticMeshComponent* BallComponent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Move")
 	USceneComponent* Pivot;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
@@ -38,10 +41,16 @@ protected:
 	float JumpForce;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
+	float DashStrength;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
 	float CamRotSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
 	float GroundCheckSize;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
+	int MaxJumpCount = 2;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	UInputMappingContext* PlayerMappingContext;
@@ -54,6 +63,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction> IALook;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> IADash;
 
 protected:
 	// Called when the game starts or when spawned
@@ -68,6 +80,8 @@ public:
 
 private:
 	void Jump(const FInputActionValue& Value);
+	void DashPressed(const FInputActionValue& Value);
+	void DashReleased(const FInputActionValue& Value);
 	void Move(const FInputActionValue& Value);
 	void LookAround(const FInputActionValue& Value);
 	void GetGround();

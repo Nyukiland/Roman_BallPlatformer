@@ -7,6 +7,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "Camera/CameraComponent.h"
+#include "BAMovablePlatform.h"
 
 // Sets default values
 ABABall::ABABall()
@@ -83,6 +84,12 @@ void ABABall::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		{
 			EnhancedInputComponent->BindAction(IALook, ETriggerEvent::Triggered, this, &ABABall::LookAround);
 		}
+		if (IADash)
+		{
+			EnhancedInputComponent->BindAction(IADash, ETriggerEvent::Started, this, &ABABall::DashPressed);
+			EnhancedInputComponent->BindAction(IADash, ETriggerEvent::Canceled, this, &ABABall::DashReleased);
+			EnhancedInputComponent->BindAction(IADash, ETriggerEvent::Completed, this, &ABABall::DashReleased);
+		}
 	}
 }
 
@@ -90,20 +97,41 @@ void ABABall::Jump(const FInputActionValue& Value)
 {
 	if (!CheckValidity()) return;
 
-	if (Grounded) BallComponent->AddImpulse(FVector(0, 0, JumpForce), NAME_None, true);
+	if (JumpCount < MaxJumpCount)
+	{
+		BallComponent->SetPhysicsLinearVelocity(FVector(BallComponent->GetPhysicsLinearVelocity().X, BallComponent->GetPhysicsLinearVelocity().Y, 0));
+		BallComponent->AddImpulse(FVector(0, 0, JumpForce), NAME_None, true);
+		++JumpCount;
+	}
+}
+
+void ABABall::DashPressed(const FInputActionValue& Value)
+{
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 0.5f);
+	CanMove = false;
+}
+
+void ABABall::DashReleased(const FInputActionValue& Value)
+{
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), 1);
+	CanMove = true;
+
+	BallComponent->SetPhysicsLinearVelocity(FVector::Zero());
+	BallComponent->AddImpulse(Pivot->GetForwardVector() * DashStrength, NAME_None, true);
 }
 
 void ABABall::Move(const FInputActionValue& Value)
 {
-	if (!CheckValidity()) return;
+	if (!CheckValidity() || !CanMove) return;
 
 	FVector2D MoveDir = Value.Get<FVector2D>();
 
 	FVector Movement = Pivot->GetForwardVector() * MoveDir.X;
 	Movement += Pivot->GetRightVector() * MoveDir.Y;
-	Movement *= Speed;
+	if (Grounded) Movement *= Speed;
+	else Movement *= Speed / 2;
 
-	BallComponent->AddForce(Movement, NAME_None, false);
+	BallComponent->AddForce(Movement, NAME_None, true);
 }
 
 void ABABall::LookAround(const FInputActionValue& Value)
@@ -123,7 +151,7 @@ void ABABall::GetGround()
 	if (!CheckValidity()) return;
 
 	FVector Start = BallComponent->GetComponentLocation();
-	FVector End = Start + FVector(0, 0, -GroundCheckSize); 
+	FVector End = Start + FVector(0, 0, -GroundCheckSize);
 	FCollisionQueryParams TraceParams;
 	TraceParams.AddIgnoredActor(this);
 
@@ -133,23 +161,14 @@ void ABABall::GetGround()
 	{
 		Grounded = true;
 
-		AActor* HitActor = Hit.GetActor();
-		if (HitActor && HitActor->GetRootComponent()->Mobility == EComponentMobility::Movable)
-		{
-			IsAttached = true;
-			//AttachToComponent(HitActor->GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
-		}
-		else
-		{
-			//DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-			IsAttached = false;
-		}
+		ABAMovablePlatform* HitPlatform = Cast<ABAMovablePlatform>(Hit.GetActor());
+		if (HitPlatform) SetActorLocation(GetActorLocation() + HitPlatform->MovementValue * 0.05f);
+
+		if (BallComponent->GetPhysicsLinearVelocity().Z <0) JumpCount = 0;
 	}
 	else
 	{
 		Grounded = false;
-		//if (!IsAttached) DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-		IsAttached = false;
 	}
 }
 
