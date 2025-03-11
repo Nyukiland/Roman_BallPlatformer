@@ -34,7 +34,7 @@ void ABABumper::OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPr
 	if (Ball)
 	{
 		FVector PlayerVelocity = Ball->BallComponent->GetPhysicsLinearVelocity();
-		FVector Normal = Area->GetComponentLocation() - Ball->BallComponent->GetComponentLocation(); // Hit.ImpactNormal;
+		FVector Normal = Hit.ImpactNormal;
 		Normal.Z = 0;
 		FVector ReflectedVector = PlayerVelocity.MirrorByVector(Normal.GetSafeNormal());
 
