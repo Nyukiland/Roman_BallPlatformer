@@ -1,4 +1,5 @@
 #include "BABridgeController.h"
+#include "Kismet/KismetMathLibrary.h"
 
 ABABridgeController::ABABridgeController()
 {
@@ -43,15 +44,33 @@ void ABABridgeController::GenerateBridge()
 	FVector Direction = (EndLocation - StartLocation).GetSafeNormal();
 	float PlankLength = (EndLocation - StartLocation).Size() / BridgePlanksCount;
 
-	//get distance and divide it by the number of BridgePlanksCount
-	//for number of BridgePlanksCount create a plank with dir normalised multiplied by the rotation
-	//add plank to the list Planks
+	ABABridgeConnector* CurConnector = GetWorld()->SpawnActor<ABABridgeConnector>();
+	CurConnector->SetActorLocation(StartLocation);
+	CurConnector->IsAnchor = true;
+	CurConnector->PullingStrength = PullingStrength;
+	Connectors.Add(CurConnector);
 
-	//loop on created plank and spawn connector between two planks
-	//connect planks to connector and connector to planks using their list
+	for (int i = 0; i < BridgePlanksCount; i++)
+	{
+		ABAPlank* CurPlank = GetWorld()->SpawnActor<ABAPlank>(PlankToSpawn);
+		CurPlank->MaxStress = MaxStress;
+		FVector CurPos = StartLocation + Direction * PlankLength * i;
+		CurPlank->SetActorLocation(CurPos);
+		CurPlank->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(CurConnector->GetActorLocation(), CurConnector->GetActorLocation() + Direction));
+		Planks.Add(CurPlank);
 
-	//create the connector at start and end location and set it to isAnchor
+		CurPlank->ConnectedJoints.Add(CurConnector);
 
+		CurConnector = GetWorld()->SpawnActor<ABABridgeConnector>();
+		CurConnector->PullingStrength = PullingStrength;
+		CurConnector->SetActorLocation(CurPos);
+		Connectors.Add(CurConnector);
+
+		if (Planks.Num() != 0) Planks.Last()->ConnectedJoints.Add(CurConnector);
+	}
+
+	CurConnector->SetActorLocation(EndLocation);
+	CurConnector->IsAnchor = true;
 }
 
 void ABABridgeController::BeginPlay()
@@ -60,18 +79,6 @@ void ABABridgeController::BeginPlay()
 
 	if (Connectors.Num() == 0 || Planks.Num() == 0)
 	{
-		GenerateBridge();
-	}
-}
-
-void ABABridgeController::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	for (ABABridgeConnector* Connector : Connectors)
-	{
-		if (Connector)
-		{
-			Connector->ApplyWeight(100.0f);
-		}
+		//GenerateBridge();
 	}
 }

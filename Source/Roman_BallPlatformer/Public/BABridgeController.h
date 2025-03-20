@@ -25,6 +25,15 @@ public:
 	int BridgePlanksCount = 10;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
+	float MaxStress = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
+	float PullingStrength = 5000;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
+	TSubclassOf<ABAPlank> PlankToSpawn;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
 	TArray<ABABridgeConnector*> Connectors;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
@@ -35,5 +44,4 @@ public:
 
 private:	
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 };

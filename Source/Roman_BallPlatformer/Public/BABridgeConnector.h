@@ -24,7 +24,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
 	float MaxPullDistance = 500.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Bridge")
 	TArray<ABAPlank*> ConnectedPlank;
 
 public:	

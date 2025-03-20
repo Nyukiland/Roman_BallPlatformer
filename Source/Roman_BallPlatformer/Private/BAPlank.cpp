@@ -7,8 +7,6 @@ ABAPlank::ABAPlank()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	PrimaryActorTick.bCanEverTick = true;
-
 	PlankMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Plank"));
 	RootComponent = PlankMesh;
 
@@ -24,6 +22,20 @@ ABAPlank::ABAPlank()
 	PlankMesh->BodyInstance.bLockXRotation = true;
 	PlankMesh->BodyInstance.bLockYRotation = true;
 	PlankMesh->BodyInstance.bLockZRotation = true;
+}
+
+void ABAPlank::BeginPlay()
+{
+	if (Mat01)
+	{
+		DynamicMaterial = UMaterialInstanceDynamic::Create(Mat01, this);
+		PlankMesh->SetMaterial(0, DynamicMaterial);
+	}
+
+	for (ABABridgeConnector* connect : ConnectedJoints)
+	{
+		connect->ConnectedPlank.Add(this);
+	}
 }
 
 void ABAPlank::Tick(float DeltaTime)
@@ -44,6 +56,8 @@ void ABAPlank::Tick(float DeltaTime)
 		}
 		Destroy();
 	}
+
+	if (DynamicMaterial) DynamicMaterial->SetScalarParameterValue(FName("Value"), FMath::Clamp(CurrentStress / MaxStress, 0, 1));
 }
 
 void ABAPlank::ApplyForce(FVector Force)

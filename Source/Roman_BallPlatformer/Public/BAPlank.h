@@ -25,9 +25,16 @@ public:
 	float CurrentStress = 0.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
+	UMaterialInterface* Mat01;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
 	TArray<ABABridgeConnector*> ConnectedJoints;
 
+private:
+	UMaterialInstanceDynamic* DynamicMaterial;
+
 public:	
+	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	void ApplyForce(FVector Force);
 	bool ShouldBreak() const;
