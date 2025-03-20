@@ -1,5 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
@@ -18,17 +16,24 @@ public:
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
+	USceneComponent* PointA;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
+	USceneComponent* PointB;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
+	int BridgePlanksCount = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
 	TArray<ABABridgeConnector*> Connectors;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
 	TArray<ABAPlank*> Planks;
 
-protected:
-	virtual void BeginPlay() override;
+	UFUNCTION(CallInEditor, BlueprintCallable, Category = "Bridge")
+	void GenerateBridge();
 
 private:	
+	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-	void RegisterConnector(ABABridgeConnector* Connector);
-	void RegisterBeam(ABAPlank* Beam);
-
 };

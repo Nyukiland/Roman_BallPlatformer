@@ -21,11 +21,17 @@ ABAPlank::ABAPlank()
 	PlankMesh->SetSimulatePhysics(true);
 	PlankMesh->SetLinearDamping(0.1f);
 	PlankMesh->SetAngularDamping(0.1f);
+	PlankMesh->BodyInstance.bLockXRotation = true;
+	PlankMesh->BodyInstance.bLockYRotation = true;
+	PlankMesh->BodyInstance.bLockZRotation = true;
 }
 
 void ABAPlank::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	float VelocityMagnitude = PlankMesh->GetPhysicsLinearVelocity().Size();
+	CurrentStress = FMath::Lerp(CurrentStress, VelocityMagnitude * 0.5f, 0.1f);
 
 	if (ShouldBreak())
 	{
