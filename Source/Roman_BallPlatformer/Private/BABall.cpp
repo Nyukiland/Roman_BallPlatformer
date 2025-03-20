@@ -1,6 +1,3 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "BABall.h"
 #include "Kismet/GameplayStatics.h"
 #include "EnhancedInputComponent.h"
@@ -90,6 +87,10 @@ void ABABall::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 			EnhancedInputComponent->BindAction(IADash, ETriggerEvent::Canceled, this, &ABABall::DashReleased);
 			EnhancedInputComponent->BindAction(IADash, ETriggerEvent::Completed, this, &ABABall::DashReleased);
 		}
+		if (IADown)
+		{
+			EnhancedInputComponent->BindAction(IADown, ETriggerEvent::Triggered, this, &ABABall::DownPressed);
+		}
 	}
 }
 
@@ -118,6 +119,13 @@ void ABABall::DashReleased(const FInputActionValue& Value)
 
 	BallComponent->SetPhysicsLinearVelocity(FVector::Zero());
 	BallComponent->AddImpulse(Pivot->GetForwardVector() * DashStrength, NAME_None, true);
+}
+
+void ABABall::DownPressed(const FInputActionValue& Value)
+{
+	if (!CheckValidity()) return;
+
+	BallComponent->AddForce(FVector::DownVector * DownForce, NAME_None, true);
 }
 
 void ABABall::Move(const FInputActionValue& Value)

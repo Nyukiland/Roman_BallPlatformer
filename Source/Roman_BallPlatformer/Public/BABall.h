@@ -44,6 +44,9 @@ protected:
 	float DashStrength;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
+	float DownForce;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
 	float CamRotSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Move")
@@ -67,6 +70,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction> IADash;
 
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> IADown;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -82,6 +88,7 @@ private:
 	void Jump(const FInputActionValue& Value);
 	void DashPressed(const FInputActionValue& Value);
 	void DashReleased(const FInputActionValue& Value);
+	void DownPressed(const FInputActionValue& Value);
 	void Move(const FInputActionValue& Value);
 	void LookAround(const FInputActionValue& Value);
 	void GetGround();
