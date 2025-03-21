@@ -23,12 +23,11 @@ ABAPlank::ABAPlank()
 	PlankMesh->BodyInstance.bLockXRotation = true;
 	PlankMesh->BodyInstance.bLockYRotation = true;
 	PlankMesh->BodyInstance.bLockZRotation = true;
-	UE_LOG(LogTemp, Error, TEXT("Constructor"));
 }
 
 void ABAPlank::BeginPlay()
 {
-	UE_LOG(LogTemp, Error, TEXT("Begin"));
+	Super::BeginPlay();
 
 	if (Mat01)
 	{
@@ -46,21 +45,19 @@ void ABAPlank::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	UE_LOG(LogTemp, Error, TEXT("Tick"));
-
 	float VelocityMagnitude = PlankMesh->GetPhysicsLinearVelocity().Size();
 	CurrentStress = FMath::Lerp(CurrentStress, VelocityMagnitude * 0.5f, 0.1f);
 
 	if (ShouldBreak())
 	{
-		for (ABABridgeConnector* Connector : ConnectedJoints)
+		/*for (ABABridgeConnector* Connector : ConnectedJoints)
 		{
 			if (Connector)
 			{
 				Connector->ConnectedPlank.Remove(this);
 			}
 		}
-		Destroy();
+		Destroy();*/
 	}
 
 	if (DynamicMaterial) DynamicMaterial->SetScalarParameterValue(FName("Value"), FMath::Clamp(CurrentStress / MaxStress, 0, 1));
