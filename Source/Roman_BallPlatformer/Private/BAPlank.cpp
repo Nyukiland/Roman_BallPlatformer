@@ -6,6 +6,7 @@
 ABAPlank::ABAPlank()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = true;
 
 	PlankMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Plank"));
 	RootComponent = PlankMesh;
@@ -22,10 +23,13 @@ ABAPlank::ABAPlank()
 	PlankMesh->BodyInstance.bLockXRotation = true;
 	PlankMesh->BodyInstance.bLockYRotation = true;
 	PlankMesh->BodyInstance.bLockZRotation = true;
+	UE_LOG(LogTemp, Error, TEXT("Constructor"));
 }
 
 void ABAPlank::BeginPlay()
 {
+	UE_LOG(LogTemp, Error, TEXT("Begin"));
+
 	if (Mat01)
 	{
 		DynamicMaterial = UMaterialInstanceDynamic::Create(Mat01, this);
@@ -41,6 +45,8 @@ void ABAPlank::BeginPlay()
 void ABAPlank::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	UE_LOG(LogTemp, Error, TEXT("Tick"));
 
 	float VelocityMagnitude = PlankMesh->GetPhysicsLinearVelocity().Size();
 	CurrentStress = FMath::Lerp(CurrentStress, VelocityMagnitude * 0.5f, 0.1f);
