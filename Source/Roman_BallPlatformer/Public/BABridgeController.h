@@ -31,6 +31,9 @@ public:
 	float PullingStrength = 5000;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
+	float MinDistConnector = 10;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
 	TSubclassOf<ABAPlank> PlankToSpawn;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
@@ -42,6 +45,7 @@ public:
 	UFUNCTION(CallInEditor, BlueprintCallable, Category = "Bridge")
 	void GenerateBridge();
 
-private:	
+protected:	
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 };

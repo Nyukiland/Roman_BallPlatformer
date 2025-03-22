@@ -5,9 +5,6 @@
 
 ABAPlank::ABAPlank()
 {
-	PrimaryActorTick.bCanEverTick = true;
-	PrimaryActorTick.bStartWithTickEnabled = true;
-
 	PlankMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Plank"));
 	RootComponent = PlankMesh;
 
@@ -18,6 +15,7 @@ ABAPlank::ABAPlank()
 	}
 
 	PlankMesh->SetSimulatePhysics(true);
+	PlankMesh->SetEnableGravity(false);
 	PlankMesh->SetLinearDamping(0.1f);
 	PlankMesh->SetAngularDamping(0.1f);
 	PlankMesh->BodyInstance.bLockXRotation = true;
@@ -41,34 +39,46 @@ void ABAPlank::BeginPlay()
 	}
 }
 
-void ABAPlank::Tick(float DeltaTime)
+void ABAPlank::TickPlank(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	float VelocityMagnitude = PlankMesh->GetPhysicsLinearVelocity().Size();
-	CurrentStress = FMath::Lerp(CurrentStress, VelocityMagnitude * 0.5f, 0.1f);
+	UpdateStrength();
 
-	if (ShouldBreak())
+	//CheckDestroy();
+
+	if (DynamicMaterial) DynamicMaterial->SetScalarParameterValue(FName("Value"), GetStress01());
+}
+
+void ABAPlank::ApplyForce(FVector Force)
+{
+	CurrentExternalForce += Force;
+}
+
+float ABAPlank::GetStress01() const
+{
+	return FMath::Clamp(CurrentStress / MaxStress, 0, 1);
+}
+
+void ABAPlank::UpdateStrength()
+{
+	PlankMesh->SetPhysicsLinearVelocity(CurrentExternalForce + FVector(0,0, -100));
+	CurrentExternalForce = FVector::Zero();
+
+	CurrentStress = PlankMesh->GetPhysicsLinearVelocity().Y;
+}
+
+void ABAPlank::CheckDestroy()
+{
+	if (GetStress01() >= 1)
 	{
-		/*for (ABABridgeConnector* Connector : ConnectedJoints)
+		for (ABABridgeConnector* Connector : ConnectedJoints)
 		{
 			if (Connector)
 			{
 				Connector->ConnectedPlank.Remove(this);
 			}
 		}
-		Destroy();*/
+		Destroy();
 	}
-
-	if (DynamicMaterial) DynamicMaterial->SetScalarParameterValue(FName("Value"), FMath::Clamp(CurrentStress / MaxStress, 0, 1));
-}
-
-void ABAPlank::ApplyForce(FVector Force)
-{
-	PlankMesh->AddForce(Force, NAME_None, true);
-}
-
-bool ABAPlank::ShouldBreak() const
-{
-	return CurrentStress > MaxStress;
 }

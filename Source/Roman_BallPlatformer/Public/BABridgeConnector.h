@@ -22,13 +22,12 @@ public:
 	float PullingStrength = 1000.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
-	float MaxPullDistance = 500.0f;
+	float MinPullDistance = 100.0f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Bridge")
 	TArray<ABAPlank*> ConnectedPlank;
 
 public:	
-	virtual void Tick(float DeltaTime) override;
+	void TickConnector(float DeltaTime);
 	void ApplyPullingForce();
-	void ApplyWeight(float Weight);
 };

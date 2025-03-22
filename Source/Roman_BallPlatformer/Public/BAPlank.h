@@ -32,11 +32,16 @@ public:
 
 private:
 	UMaterialInstanceDynamic* DynamicMaterial;
+	FVector CurrentExternalForce;
+	FVector PreviousExternalForce;
 
 public:	
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
+	void TickPlank(float DeltaTime);
 	void ApplyForce(FVector Force);
-	bool ShouldBreak() const;
 
+private:
+	float GetStress01() const;
+	void UpdateStrength();
+	void CheckDestroy();
 };

@@ -63,6 +63,7 @@ void ABABridgeController::GenerateBridge()
 
 		CurConnector = GetWorld()->SpawnActor<ABABridgeConnector>();
 		CurConnector->PullingStrength = PullingStrength;
+		CurConnector->MinPullDistance = MinDistConnector;
 		CurConnector->SetActorLocation(CurPos);
 		Connectors.Add(CurConnector);
 
@@ -81,4 +82,12 @@ void ABABridgeController::BeginPlay()
 	{
 		//GenerateBridge();
 	}
+}
+
+void ABABridgeController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	for (ABABridgeConnector* Connector : Connectors) if (Connector) Connector->TickConnector(DeltaTime);
+	for (ABAPlank* Plank : Planks) if (Plank) Plank->TickPlank(DeltaTime);
 }

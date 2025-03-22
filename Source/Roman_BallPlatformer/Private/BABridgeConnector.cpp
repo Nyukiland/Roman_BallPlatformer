@@ -3,11 +3,10 @@
 
 ABABridgeConnector::ABABridgeConnector()
 {
-	PrimaryActorTick.bCanEverTick = true;
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 }
 
-void ABABridgeConnector::Tick(float DeltaTime)
+void ABABridgeConnector::TickConnector(float DeltaTime)
 {
 	ApplyPullingForce();
 
@@ -29,22 +28,6 @@ void ABABridgeConnector::Tick(float DeltaTime)
 	}
 }
 
-void ABABridgeConnector::ApplyWeight(float Weight)
-{
-	if (ConnectedPlank.Num() == 0)
-		return;
-
-	float ForcePerPlank = Weight / ConnectedPlank.Num();
-
-	for (ABAPlank* Plank : ConnectedPlank)
-	{
-		if (Plank)
-		{
-			Plank->ApplyForce(FVector(0, 0, -ForcePerPlank)); // Apply downward force
-		}
-	}
-}
-
 void ABABridgeConnector::ApplyPullingForce()
 {
 	for (ABAPlank* Plank : ConnectedPlank)
@@ -54,16 +37,12 @@ void ABABridgeConnector::ApplyPullingForce()
 			FVector DirectionToConnector = GetActorLocation() - Plank->GetActorLocation();
 
 			float Distance = DirectionToConnector.Size();
-
-			if (Distance > MaxPullDistance)
-			{
-				continue;
-			}
+			Distance = FMath::Clamp(Distance, MinPullDistance, Distance);
 
 			DirectionToConnector.Normalize();
 
-			float ForceMagnitude = FMath::Clamp(PullingStrength * (MaxPullDistance - Distance), 0.0f, PullingStrength);
-
+			float ForceMagnitude = PullingStrength * (Distance - MinPullDistance);
+			
 			FVector Force = DirectionToConnector * ForceMagnitude;
 
 			Plank->ApplyForce(Force);

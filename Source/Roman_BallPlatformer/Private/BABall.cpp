@@ -125,6 +125,7 @@ void ABABall::DownPressed(const FInputActionValue& Value)
 {
 	if (!CheckValidity()) return;
 
+	UE_LOG(LogTemp, Error, TEXT("Down"));
 	BallComponent->AddForce(FVector::DownVector * DownForce, NAME_None, true);
 }
 
