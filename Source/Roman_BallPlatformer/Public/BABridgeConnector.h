@@ -22,6 +22,9 @@ public:
 	float PullingStrength = 1000.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
+	float Stiffness = 100.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
 	float MinPullDistance = 100.0f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Bridge")

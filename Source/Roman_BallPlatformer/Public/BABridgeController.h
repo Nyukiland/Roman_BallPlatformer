@@ -28,7 +28,13 @@ public:
 	float MaxStress = 100;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
-	float PullingStrength = 5000;
+	float PullingStrength = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
+	float Stiffness = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
+	float AnchorPullingStrength = 500;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Bridge")
 	float MinDistConnector = 10;

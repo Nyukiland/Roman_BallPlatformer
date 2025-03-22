@@ -15,7 +15,7 @@ ABAPlank::ABAPlank()
 	}
 
 	PlankMesh->SetSimulatePhysics(true);
-	PlankMesh->SetEnableGravity(false);
+	PlankMesh->SetEnableGravity(true);
 	PlankMesh->SetLinearDamping(0.1f);
 	PlankMesh->SetAngularDamping(0.1f);
 	PlankMesh->BodyInstance.bLockXRotation = true;
@@ -62,10 +62,11 @@ float ABAPlank::GetStress01() const
 
 void ABAPlank::UpdateStrength()
 {
-	PlankMesh->SetPhysicsLinearVelocity(CurrentExternalForce + FVector(0,0, -100));
-	CurrentExternalForce = FVector::Zero();
+	PlankMesh->AddForce(CurrentExternalForce, NAME_None, true);
 
-	CurrentStress = PlankMesh->GetPhysicsLinearVelocity().Y;
+	CurrentStress = CurrentExternalForce.Size();
+
+	CurrentExternalForce = FVector::Zero();
 }
 
 void ABAPlank::CheckDestroy()

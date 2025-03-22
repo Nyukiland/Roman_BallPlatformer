@@ -34,15 +34,13 @@ void ABABridgeConnector::ApplyPullingForce()
 	{
 		if (Plank)
 		{
-			FVector DirectionToConnector = GetActorLocation() - Plank->GetActorLocation();
+			FVector DirectionToConnector = GetActorLocation() - Plank->PlankMesh->GetComponentLocation();
+			float CurrentDistance = DirectionToConnector.Size();
 
-			float Distance = DirectionToConnector.Size();
-			Distance = FMath::Clamp(Distance, MinPullDistance, Distance);
+			float StretchFactor = FMath::Clamp(CurrentDistance - MinPullDistance, -Stiffness, Stiffness);
+			float ForceMagnitude = PullingStrength * StretchFactor;
 
 			DirectionToConnector.Normalize();
-
-			float ForceMagnitude = PullingStrength * (Distance - MinPullDistance);
-			
 			FVector Force = DirectionToConnector * ForceMagnitude;
 
 			Plank->ApplyForce(Force);

@@ -47,13 +47,11 @@ void ABABridgeController::GenerateBridge()
 	ABABridgeConnector* CurConnector = GetWorld()->SpawnActor<ABABridgeConnector>();
 	CurConnector->SetActorLocation(StartLocation);
 	CurConnector->IsAnchor = true;
-	CurConnector->PullingStrength = PullingStrength;
 	Connectors.Add(CurConnector);
 
 	for (int i = 0; i < BridgePlanksCount; i++)
 	{
 		ABAPlank* CurPlank = GetWorld()->SpawnActor<ABAPlank>(PlankToSpawn);
-		CurPlank->MaxStress = MaxStress;
 		FVector CurPos = StartLocation + Direction * PlankLength * i;
 		CurPlank->SetActorLocation(CurPos);
 		CurPlank->SetActorRotation(UKismetMathLibrary::FindLookAtRotation(CurConnector->GetActorLocation(), CurConnector->GetActorLocation() + Direction));
@@ -62,8 +60,6 @@ void ABABridgeController::GenerateBridge()
 		CurPlank->ConnectedJoints.Add(CurConnector);
 
 		CurConnector = GetWorld()->SpawnActor<ABABridgeConnector>();
-		CurConnector->PullingStrength = PullingStrength;
-		CurConnector->MinPullDistance = MinDistConnector;
 		CurConnector->SetActorLocation(CurPos);
 		Connectors.Add(CurConnector);
 
@@ -78,9 +74,23 @@ void ABABridgeController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (Connectors.Num() == 0 || Planks.Num() == 0)
+	for (ABABridgeConnector* Connector : Connectors)
 	{
-		//GenerateBridge();
+		if (Connector)
+		{
+			Connector->MinPullDistance = MinDistConnector;
+			Connector->Stiffness = Stiffness;
+			if (Connector->IsAnchor) Connector->PullingStrength = AnchorPullingStrength;
+			else Connector->PullingStrength = PullingStrength;
+		}
+	}
+
+	for (ABAPlank* Plank : Planks)
+	{
+		if (Plank)
+		{
+			Plank->MaxStress = MaxStress;
+		}
 	}
 }
 

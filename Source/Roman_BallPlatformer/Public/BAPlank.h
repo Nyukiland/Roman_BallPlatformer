@@ -33,7 +33,6 @@ public:
 private:
 	UMaterialInstanceDynamic* DynamicMaterial;
 	FVector CurrentExternalForce;
-	FVector PreviousExternalForce;
 
 public:	
 	virtual void BeginPlay() override;
