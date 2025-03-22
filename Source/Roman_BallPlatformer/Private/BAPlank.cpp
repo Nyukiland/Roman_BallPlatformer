@@ -19,7 +19,7 @@ ABAPlank::ABAPlank()
 	PlankMesh->SetLinearDamping(0.1f);
 	PlankMesh->SetAngularDamping(0.1f);
 	PlankMesh->BodyInstance.bLockXRotation = true;
-	PlankMesh->BodyInstance.bLockYRotation = true;
+	PlankMesh->BodyInstance.bLockYRotation = false;
 	PlankMesh->BodyInstance.bLockZRotation = true;
 }
 
@@ -45,7 +45,7 @@ void ABAPlank::TickPlank(float DeltaTime)
 
 	UpdateStrength();
 
-	//CheckDestroy();
+	CheckDestroy(DeltaTime);
 
 	if (DynamicMaterial) DynamicMaterial->SetScalarParameterValue(FName("Value"), GetStress01());
 }
@@ -69,17 +69,22 @@ void ABAPlank::UpdateStrength()
 	CurrentExternalForce = FVector::Zero();
 }
 
-void ABAPlank::CheckDestroy()
+void ABAPlank::CheckDestroy(float DeltaTime)
 {
 	if (GetStress01() >= 1)
 	{
-		for (ABABridgeConnector* Connector : ConnectedJoints)
+		TimerDestroy += DeltaTime;
+		if (TimerDestroy > 2)
 		{
-			if (Connector)
+			for (ABABridgeConnector* Connector : ConnectedJoints)
 			{
-				Connector->ConnectedPlank.Remove(this);
+				if (Connector)
+				{
+					Connector->ConnectedPlank.Remove(this);
+				}
 			}
+			Destroy();
 		}
-		Destroy();
 	}
+	else TimerDestroy = 0;
 }

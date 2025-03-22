@@ -33,6 +33,7 @@ public:
 private:
 	UMaterialInstanceDynamic* DynamicMaterial;
 	FVector CurrentExternalForce;
+	float TimerDestroy;
 
 public:	
 	virtual void BeginPlay() override;
@@ -42,5 +43,5 @@ public:
 private:
 	float GetStress01() const;
 	void UpdateStrength();
-	void CheckDestroy();
+	void CheckDestroy(float DeltaTime);
 };
